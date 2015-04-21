@@ -38,7 +38,7 @@ public class WebServer {
 			}
 			
 			// send resp to client
-			String content = "welcome to my homepage";
+			String content = "<html><head><title>test</title></head><body>COMP 4621 Project Report<br>Student Name: Kim Jihyok<br>Student ID: 10565979</body></html>";
 			String html = 	"HTTP/1.1 200 OK\n Connection:close\n Date: Mon, 23 Feb 2009 14:23:00 GMT\n" 
 							+ "Server:Apache/1.3.0 (unix)\n Content-Length:" + content.length() + "\n" + "Content- Type: text/html\n\n" + content;
 			DataOutputStream outToServer = new DataOutputStream(socket.getOutputStream());
