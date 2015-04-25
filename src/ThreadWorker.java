@@ -61,6 +61,7 @@ public class ThreadWorker extends Thread {
 				}
 				//if test.mp4 request has range
 				if(arrHttpContent[3].contains("byte")){
+					//System.out.println(testFile.length());
 					//System.out.println("TheadWorker/arrHttpContent: Contains the char sequence byte");
 					String range = arrHttpContent[3].substring(6);
 					range = range.split("\n")[0];
@@ -102,10 +103,31 @@ public class ThreadWorker extends Thread {
 								+ "Content-disposition: attachment; filename=test.mp4\n"
 								+ "Accept-Ranges: bytes\n"
 								+ "Content-Range: bytes " + firstPart+ "-" +secondPart+ "/" + testFile.length() + "\n\n";
-					DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
+					DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());	
 					outToServer.writeBytes(html); // send out html
+					
+					int size = secondPart - firstPart + 1;
+					byte[] fileArrayInBytes = new byte[size];
+					
+					FileInputStream fileInputStream = null;
+					try {
+						fileInputStream = new FileInputStream(testFile);
+						fileInputStream.read(fileArrayInBytes, 0, size);
+						fileInputStream.close();
+					}catch(Exception e){
+						e.printStackTrace();
+					}
+					
+					outToServer.write(fileArrayInBytes);					
 					outToServer.flush();
-					clientSocket.close(); // close the socket;
+					clientSocket.close();
+
+					
+					
+					//DataInputStream fileStream = new DataInputStream( new BufferedInputStream(socket.getInputStream()));
+					//outToServer.write(byteArrayOutputStream.toByteArray(), firstPart, secondPart-firstPart+1);
+					
+					 // close the socket;
 				} else {
 					//if test.mp4 request does not have range
 					String content = "";
@@ -116,8 +138,10 @@ public class ThreadWorker extends Thread {
 								+ "Content-Type: video/mp4\n" 
 								+ "Accept-Ranges: bytes\n\n";
 					DataOutputStream outToServer = new DataOutputStream(clientSocket.getOutputStream());
-					outToServer.writeBytes(html); // send out html
+					outToServer.writeBytes(html); // send out html		
 					outToServer.flush();
+					
+					
 					clientSocket.close(); // close the socket;
 				}
 				return;
@@ -141,9 +165,11 @@ public class ThreadWorker extends Thread {
 		} 
 	}
 
+
 	private boolean thridError() {
 		//1. fistError - the secondPart is smaller than firstPart
 		if(secondPart < firstPart){
+			System.out.println("the secondPart is smaller than firstPart");
 			return true;
 		}
 		return false;
@@ -152,6 +178,7 @@ public class ThreadWorker extends Thread {
 	private boolean secondError() {
 		//2. secondError - secondPart exceeds the fileSize
 		if(secondPart > testFile.length()){
+			System.out.println("secondPart exceeds the fileSize");
 			return true;
 		}
 		return false;
@@ -160,6 +187,7 @@ public class ThreadWorker extends Thread {
 	private boolean firstError() {
 		//3. thirdError - smallerPart goes below 0
 		if(firstPart < 0){
+			System.out.println("smallerPart goes below 0");
 			return true;
 		}
 		return false;
